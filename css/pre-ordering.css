@@ -1,0 +1,100 @@
+/* Styles for the preorder container */
+.preorder-container {
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+
+/* Header styles */
+.preorder-container header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.preorder-container header h1 {
+    margin: 0;
+    font-size: 2em;
+    color: #333;
+}
+
+/* Styles for form */
+.preorder-form .form-group {
+    margin-bottom: 15px;
+}
+
+.preorder-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.preorder-form input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Styles for menu section */
+.menu-section {
+    margin-top: 20px;
+}
+
+.menu-section h2 {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Styles for each menu item */
+.menu-item {
+    margin-bottom: 20px; /* Space between menu items */
+    padding: 15px; /* Space within each menu item */
+    border: 1px solid #ccc; /* Optional: adds a border around each menu item for better visibility */
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.menu-item .item-name,
+.menu-item .item-price,
+.menu-item label,
+.menu-item input {
+    display: block; /* Makes each element take its own line */
+    margin-bottom: 5px; /* Adds space between the elements within each menu item */
+}
+
+.menu-item .item-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.menu-item .item-price {
+    color: #888;
+}
+
+/* Styles for submit button */
+.circle-btn {
+    display: block;
+    width: 200px;
+    height: 50px;
+    margin: 20px auto;
+    background-color: #000000;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+}
+
+.circle-btn:hover {
+    background-color: #000000;
+}

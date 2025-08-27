@@ -1,0 +1,75 @@
+@font-face {
+    font-family: 'OratorW01-Medium';
+    src: url('../img/OratorW01-Medium.ttf') format('truetype');
+}
+
+body {
+    font-family: 'OratorW01-Medium', sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.signup-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 400px;
+    font-family: 'OratorW01-Medium', sans-serif;
+    text-align: center;
+}
+
+header {
+    text-align: center;
+    font-family: 'OratorW01-Medium', sans-serif;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 36px;
+    font-family: 'OratorW01-Medium', sans-serif;
+    color: #000000;
+}
+
+.signup-form .form-group {
+    margin-bottom: 15px;
+    font-family: 'OratorW01-Medium', sans-serif;
+    text-align: left;
+}
+
+.signup-form .form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.signup-form .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.circle-btn {
+    padding: 15px;
+    width: 100%;
+    font-size: 18px;
+    border: none;
+    border-radius: 25px;
+    background-color: #000000;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'OratorW01-Medium', sans-serif;
+    text-align: center;
+}
+
+.circle-btn:hover {
+    background-color: #000000;
+}

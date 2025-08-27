@@ -1,0 +1,83 @@
+@font-face {
+    font-family: 'OratorW01-Medium';
+    src: url('../img/OratorW01-Medium.ttf') format('truetype');
+}
+
+
+body {
+    font-family: 'OratorW01-Medium', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+    font-family: 'OratorW01-Medium', sans-serif;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.circle-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.circle-btn:hover {
+    background-color: #333;
+}
+
+.circle-btn1 {
+    width: 100%;
+    padding: 10px;
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.circle-btn1:hover {
+    background-color: #f0f0f0;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

@@ -1,0 +1,81 @@
+@font-face {
+    font-family: 'OratorW01-Medium';
+    src: url('../img/OratorW01-Medium.ttf') format('truetype');
+}
+
+body {
+    font-family: 'OratorW01-Medium', sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-y: auto; /* Ensures the page is scrollable */
+}
+
+h1 {
+    color: #000000;
+    font-family: 'OratorW01-Medium', sans-serif;
+    margin-top: 20px;
+}
+
+.employee-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'OratorW01-Medium', sans-serif;
+    margin-top: 30px;
+    width: 80%;
+    max-width: 800px;
+}
+
+.employee-section {
+    background-color: #fff;
+    padding: 20px;
+    margin-top: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    font-family: 'OratorW01-Medium', sans-serif;
+    text-align: center;
+}
+
+.employee-section h2 {
+    color: #000000;
+    font-family: 'OratorW01-Medium', sans-serif;
+    margin-top: 0;
+}
+
+.employee-section form {
+    display: flex;
+    flex-direction: column;
+    font-family: 'OratorW01-Medium', sans-serif;
+    align-items: center;
+}
+
+.employee-section input {
+    padding: 10px;
+    margin: 10px 0;
+    width: 80%;
+    font-family: 'OratorW01-Medium', sans-serif;
+    max-width: 400px;
+}
+
+.employee-section button {
+    padding: 10px 20px;
+    margin: 10px 0;
+    font-size: 16px;
+    background-color: #000000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-family: 'OratorW01-Medium', sans-serif;
+    cursor: pointer;
+}
+
+.employee-section button:hover {
+    background-color: #000000;
+    font-family: 'OratorW01-Medium', sans-serif;
+}

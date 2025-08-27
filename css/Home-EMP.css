@@ -1,0 +1,84 @@
+@font-face {
+    font-family: 'OratorW01-Medium';
+    src: url('../img/OratorW01-Medium.ttf') format('truetype');
+}
+
+#div1 {
+    background: url('../img/picHome.png') no-repeat center center;
+    background-size: 1500px 850px;
+    border-radius: 20px;
+    /* background-size: cover; */
+
+}
+
+h1 {
+    /* font-family: 'OratorW01-Medium', cursive; */
+    font-family: 'OratorW01-Medium', sans-serif;
+    font-size: 50px;
+    text-align: center;
+    color: #000000;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 100px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align buttons to the left */
+    gap: 20px; /* Space between buttons */
+    margin-left: 50px; /* Add some left margin */
+}
+
+
+
+p {
+    color: #000000;
+    font-family: 'OratorW01-Medium', sans-serif;
+    font-size: 24px;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.special-offer {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    font-family: 'OratorW01-Medium', sans-serif;
+    text-align: center;
+}
+
+.cards-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    border-radius: 5px;
+    width: 45%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.circle-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background-color: #000000;
+    color: #fff;
+    text-decoration: none;
+    margin-top: 10px;
+    width: 200px;
+    font-family: 'OratorW01-Medium', sans-serif;
+    text-align: center;
+}
+
+.circle-btn:hover {
+    background-color: #000000;
+}
+
+
+
