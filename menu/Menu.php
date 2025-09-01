@@ -1,22 +1,31 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mood-Based Food Recommender - Gallery Cafe</title>
-    <link rel="stylesheet" href="../css/Menu.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+
+@font-face {
+    font-family: 'OratorW01-Medium';
+    src: url('../img/OratorW01-Medium.ttf') format('truetype');
+}
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+             font-family: 'OratorW01-Medium', sans-serif;
+            background: linear-gradient(135deg, #686869ff 0%, #000000ff 100%);
             color: #333;
             margin: 0;
             padding: 0;
             min-height: 100vh;
         }
-        
+
         .navbar {
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(4, 0, 0, 0.95);
             backdrop-filter: blur(10px);
             padding: 1rem 0;
             box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
@@ -24,7 +33,7 @@
             top: 0;
             z-index: 100;
         }
-        
+
         .navbar ul {
             list-style: none;
             margin: 0;
@@ -33,28 +42,28 @@
             justify-content: center;
             gap: 20px;
         }
-        
+
         .navbar li a {
-            color: #333;
+            color: #ffffffff;
             text-decoration: none;
             padding: 12px 24px;
-            display: block;
+            display: white;
             border-radius: 25px;
             font-weight: 500;
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid transparent;
         }
-        
+
         .navbar li a:hover {
-            background: #667eea;
+           
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .container {
-            max-width: 1000px;
+            max-width: 1250px;
             margin: 30px auto;
             padding: 30px;
             background: rgba(255, 255, 255, 0.95);
@@ -62,24 +71,25 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
         }
-        
+
         h1 {
             color: #444;
             margin-bottom: 30px;
             font-size: 2.5em;
             text-align: center;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #000000ff, #000000ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .mood-suggestions {
             text-align: center;
             margin-bottom: 20px;
         }
-        
+
         .mood-tag {
+             font-family: 'OratorW01-Medium', sans-serif;
             display: inline-block;
             background: linear-gradient(45deg, #ff6b6b, #feca57);
             color: white;
@@ -91,18 +101,18 @@
             font-size: 0.9em;
             border: none;
         }
-        
+
         .mood-tag:hover {
             transform: scale(1.05);
         }
-        
+
         .search-form {
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
             align-items: center;
         }
-        
+
         .search-form input[type="text"] {
             flex-grow: 1;
             padding: 15px 20px;
@@ -112,13 +122,14 @@
             outline: none;
             transition: all 0.3s ease;
         }
-        
+
         .search-form input[type="text"]:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
+
         .search-form button {
+             font-family: 'OratorW01-Medium', sans-serif;
             padding: 15px 30px;
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
@@ -129,61 +140,65 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .search-form button:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
         }
-        
+
         .menu {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            /* Changed minmax to make items thicker */
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 25px;
         }
-        
+
         .menu-item {
             border: none;
             border-radius: 15px;
-            padding: 20px;
+            /* Reduced padding to make items shorter */
+            padding: 15px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             background: white;
             overflow: hidden;
+            position: relative;
         }
-        
+
         .menu-item:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
-        
+
         .menu-item img {
             width: 100%;
-            height: 180px;
+            /* Reduced height to make items shorter */
+            height: 400px;
             object-fit: cover;
             border-radius: 10px;
             margin-bottom: 15px;
             transition: transform 0.3s ease;
         }
-        
+
         .menu-item:hover img {
             transform: scale(1.05);
         }
-        
+
         .menu-item h3 {
             font-size: 1.4em;
             margin-bottom: 10px;
             color: #333;
             font-weight: 600;
         }
-        
+
         .menu-item p {
             font-size: 0.95em;
             color: #666;
             margin-bottom: 15px;
             line-height: 1.5;
         }
-        
+
         .menu-item .price {
             font-size: 1.3em;
             font-weight: bold;
@@ -193,8 +208,9 @@
             background-clip: text;
             margin-bottom: 15px;
         }
-        
+
         .add-to-cart-button {
+             font-family: 'OratorW01-Medium', sans-serif;
             display: inline-block;
             background: linear-gradient(45deg, #ffc107, #ff8f00);
             color: white;
@@ -207,19 +223,19 @@
             transition: all 0.3s ease;
             width: 100%;
         }
-        
+
         .add-to-cart-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
         }
-        
+
         .loading {
             text-align: center;
             padding: 40px;
             color: #666;
             font-size: 1.1em;
         }
-        
+
         .cart-notification {
             position: fixed;
             top: 20px;
@@ -233,11 +249,11 @@
             transform: translateX(400px);
             transition: transform 0.3s ease;
         }
-        
+
         .cart-notification.show {
             transform: translateX(0);
         }
-        
+
         .error-message {
             background: linear-gradient(45deg, #dc3545, #c82333);
             color: white;
@@ -245,6 +261,20 @@
             border-radius: 10px;
             text-align: center;
             margin: 20px 0;
+        }
+
+        .shop-info {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 5px;
+            text-align: left;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+        .shop-info strong {
+            color: #555;
+            display: block;
+            margin-bottom: 3px;
         }
     </style>
 </head>
@@ -339,25 +369,33 @@
                         itemDiv.classList.add('menu-item');
                         
                         const rawImagePath = foodItem.image || '';
-                        const imageUrl = rawImagePath.replace('../', ''); 
-                        const fullImageUrl = `../uploads/${imageUrl}`; 
+                        const fullImageUrl = `../${rawImagePath}`; 
 
                         const itemName = foodItem.name || 'Unknown Item';
                         const itemId = foodItem.id || Math.random().toString(36); 
-                        const itemDescription = foodItem.description || 'Delicious food item';
                         const itemPrice = parseFloat(foodItem.price) || 0;
+                        const itemDescription = foodItem.description || 'Delicious food item';
+                        const shopId = foodItem.shop_id || null;
+                        const shopName = foodItem.shop_name || 'Unknown Shop';
+                        const shopAddress = foodItem.shop_address || 'N/A';
+                        const shopCity = foodItem.shop_city || 'N/A';
 
                         itemDiv.innerHTML = `
                             <img src="${fullImageUrl}" alt="${itemName}" 
-                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&h=200&fit=crop';">
+                                 onerror="this.onerror=null; this.src='https://placehold.co/300x200/cccccc/333333?text=No+Image';">
                             <div class='menu-details'>
                                 <h3>${itemName}</h3>
                                 <p>${itemDescription}</p>
-                                <p class='price'>${itemPrice.toFixed(2)}</p>
+                                <p class='price'>$. ${itemPrice.toFixed(2)}</p>
+                                <div class="shop-info">
+                                    <strong>Shop:</strong> ${shopName}<br>
+                                    <strong>Location:</strong> ${shopAddress}, ${shopCity}
+                                </div>
                                 <button class='add-to-cart-button' 
                                         data-id='${itemId}' 
                                         data-name='${itemName}' 
-                                        data-price='${itemPrice}'>
+                                        data-price='${itemPrice}'
+                                        data-shop-id='${shopId}'>
                                     Add to Cart 🛒
                                 </button>
                             </div>
@@ -366,7 +404,6 @@
                     }
                 });
 
-                // Attach event listeners to add to cart buttons
                 attachCartEventListeners();
             } else {
                 resultsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><h3>No items found</h3></div>';
@@ -380,8 +417,14 @@
                     const itemId = this.getAttribute('data-id');
                     const itemName = this.getAttribute('data-name');
                     const itemPrice = parseFloat(this.getAttribute('data-price'));
+                    // Correctly get the shop ID from the data attribute
+                    const shopId = this.getAttribute('data-shop-id'); 
                     
-                    // Disable button temporarily
+                    if (!shopId) {
+                        showNotification(`Failed to add ${itemName}: Missing shop ID.`, true);
+                        return;
+                    }
+                    
                     this.disabled = true;
                     this.textContent = 'Adding...';
                     
@@ -393,15 +436,15 @@
                         body: JSON.stringify({ 
                             id: itemId, 
                             name: itemName, 
-                            price: itemPrice 
+                            price: itemPrice,
+                            shop_id: shopId // Now including the shop ID
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             showNotification(`${itemName} added to cart! 🎉`);
-                            cartCount++;
-                            document.getElementById('cart-count').textContent = cartCount;
+                            updateCartCount();
                         } else {
                             showNotification(`Failed to add ${itemName}: ${data.message}`, true);
                         }
@@ -411,7 +454,6 @@
                         console.error('Error:', error);
                     })
                     .finally(() => {
-                        // Re-enable button
                         this.disabled = false;
                         this.textContent = 'Add to Cart 🛒';
                     });
@@ -504,7 +546,6 @@
                     </div>
                 `;
                 console.error('Error:', error);
-                // Fallback to showing all items
                 setTimeout(() => {
                     displayItems(allMenuItems, "Full Menu (Fallback)");
                 }, 2000);

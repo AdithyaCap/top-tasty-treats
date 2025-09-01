@@ -22,9 +22,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'Admin') {
     <nav class="navbar">
         <ul>
             <li><a href="Home-Admin.php">Home</a></li>
-            <li><a href="AdminManageFood.php">Manage Food Items</a></li>
             <li><a href="AdminManageUser.php">Manage User Accounts</a></li>
-            <li><a href="AdminManageTable.php">Manage Table</a></li>
             <li><a href="../logout.php">Logout</a></li>
         </ul>
     </nav>

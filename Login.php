@@ -1,12 +1,12 @@
 <?php
-// Login.php - Fixed version using PDO
+// Login.php - Final working version
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
 session_start();
 
-// Database connection using PDO (same as sign-up)
+// Database connection using PDO
 try {
     $pdo = new PDO('mysql:host=127.0.0.1;dbname=gallerycafe;charset=utf8', 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_message = "Please enter both username and password.";
     } else {
         try {
-            // Prepare and execute query
+            // Query the database for the user
             $stmt = $pdo->prepare("SELECT id, name, pass, type, email, no FROM users WHERE name = ?");
             $stmt->execute([$username]);
             
@@ -48,8 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     // Redirect based on user role
                     if ($user['type'] == 'Admin') {
                         header("Location: ./admin/Home-Admin.php");
+                    } elseif ($user['type'] == 'Shop') {
+                        header("Location: ./shops/Home-shop.php");
                     } else {
-                        header("Location: ./Home.php"); // Regular user dashboard
+                        header("Location: ./Home.php");
                     }
                     exit();
                 } else {
@@ -59,8 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error_message = "Invalid username or password.";
             }
         } catch(PDOException $e) {
-            $error_message = "Login error. Please try again later.";
-            // Log the actual error for debugging
+            $error_message = "An error occurred. Please try again later.";
             error_log("Login error: " . $e->getMessage());
         }
     }
@@ -122,7 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h2>Login</h2>
         
         <?php 
-        // Display success or error messages
         if (!empty($success_message)) {
             echo '<div class="success-message">' . htmlspecialchars($success_message) . '</div>';
         }
@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required 
-                       value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                        value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
             </div>
             
             <div class="form-group">
@@ -145,12 +145,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             <button type="submit" class="circle-btn">Login</button>
             <br><br>
-            <a href="./Sign-up.php" class="circle-btn1">Don't have an account? Sign up</a>
+            <!-- <a href="./Sign-up.php" class="circle-btn1">Don't have an account? Sign up</a> -->
         </form>
     </div>
 
     <script>
-        // Optional: Add some client-side validation
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;

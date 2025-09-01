@@ -1,14 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php
 session_start();
 
 // Check if the user is logged in and is an admin
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'EMP') {
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'Shop') {
     header("Location: ../Home.php");
     exit();
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <link rel="stylesheet" href="../css/Home-Admin.css">
     <link rel="stylesheet" href="../css/nav.css">
@@ -21,8 +21,9 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'EMP') {
     <!-- Include the navigation bar -->
     <nav class="navbar">
         <ul>
-            <li><a href="Home-EMP.php">Home</a></li>
-            <li><a href="EmpManageFood.php">Manage Food Items</a></li>
+            <li><a href="./Home-shop.php">Home</a></li>
+            <li><a href="./ShopManageFood.php">Manage Food Items</a></li>
+            <li><a href="./ManageOrders.php">Manage Orders</a></li>
             <li><a href="../logout.php">Logout</a></li>
         </ul>
     </nav>

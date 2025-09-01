@@ -23,9 +23,9 @@
             <li><a href="Login.php">Login</a></li>
         <?php endif; ?>
         <li><a href="../menu/Menu.php">Menu</a></li>
-        <li><a href="../reserveTable/OnlineReservation.php">Table Reservation</a></li>
-        <li><a href="pre-ordering.php">Pre-order</a></li>
-        <li><a href="pre-orders.php">My Orders</a></li>
+        <li><a href="../menu/ShopMap.php">View Map</a></li>
+        <li><a href="./MyOrders.php">My Order</a></li>
+     
     </ul>
 </nav>
 
