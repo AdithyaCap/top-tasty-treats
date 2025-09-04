@@ -12,7 +12,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $foodId = $_GET['id'];
 
 // Prepare the SQL query with JOIN to get shop details
-$sql = "SELECT i.id, i.name, i.des, i.price, i.img, u.username AS shop_name, u.address AS shop_address FROM items i JOIN users u ON i.shop_id = u.id WHERE i.id = ?";
+$sql = "SELECT i.id, i.name, i.des, i.price, i.img, u.name AS shop_name, u.address AS shop_address FROM items i JOIN users u ON i.shop_id = u.id WHERE i.id = ?";
 $stmt = $conn->prepare($sql);
 
 if ($stmt === false) {

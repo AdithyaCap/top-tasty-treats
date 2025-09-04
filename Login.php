@@ -1,12 +1,12 @@
 <?php
-// Login.php - Final working version
+
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
 session_start();
 
-// Database connection using PDO
+
 try {
     $pdo = new PDO('mysql:host=127.0.0.1;dbname=gallerycafe;charset=utf8', 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -14,21 +14,21 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
-// Initialize messages
+
 $error_message = "";
 $success_message = "";
 
-// Handle form submission
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
     
-    // Basic validation
+   
     if (empty($username) || empty($password)) {
         $error_message = "Please enter both username and password.";
     } else {
         try {
-            // Query the database for the user
+           
             $stmt = $pdo->prepare("SELECT id, name, pass, type, email, no FROM users WHERE name = ?");
             $stmt->execute([$username]);
             
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($stmt->rowCount() > 0) {
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 
-                // Verify password
+                
                 if (password_verify($password, $user['pass'])) {
                     // Set session variables
                     $_SESSION['user_id'] = $user['id'];
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['email'] = $user['email'];
                     $_SESSION['no'] = $user['no'];
                     
-                    // Redirect based on user role
+                   
                     if ($user['type'] == 'Admin') {
                         header("Location: ./admin/Home-Admin.php");
                     } elseif ($user['type'] == 'Shop') {
@@ -108,16 +108,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-decoration: none;
             text-align: center;
             margin-top: 10px;
+            max-width: 370px;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <ul>
-            <li><a href="./Home.php">Home</a></li>
-            <li><a href="./Sign-up.php">Sign Up</a></li>
-        </ul>
-    </nav>
+  
     
     <div class="login-container">
         <h2>Login</h2>
@@ -145,7 +141,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             <button type="submit" class="circle-btn">Login</button>
             <br><br>
-            <!-- <a href="./Sign-up.php" class="circle-btn1">Don't have an account? Sign up</a> -->
+            <a href="./Sign-up.php" class="circle-btn1">Don't have an account? Sign up</a>
+            <a href="./Home.php" class="circle-btn1">Explore with out logging</a>
         </form>
     </div>
 

@@ -18,15 +18,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 import numpy as np
 
-# --- FLASK APP SETUP ---
+
 app = Flask(__name__)
 CORS(app)
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- ENHANCED MOOD TO FOOD CATEGORY MAPPING ---
+
 MOOD_FOOD_MAPPING = {
     # Happy moods
     'happy': ['desserts', 'sweet', 'celebration', 'colorful', 'vibrant', 'cake', 'ice cream'],
@@ -83,7 +83,7 @@ MOOD_FOOD_MAPPING = {
     'motivated': ['healthy', 'energizing', 'protein', 'fresh']
 }
 
-# --- MACHINE LEARNING COMPONENTS ---
+#  MACHINE LEARNING COMPONENTS 
 class MoodFoodClassifier:
     def __init__(self):
         self.vectorizer = None
@@ -126,19 +126,19 @@ class MoodFoodClassifier:
             logger.info(f"CSV loaded successfully. Shape: {df.shape}")
             logger.info(f"CSV columns: {df.columns.tolist()}")
             
-            # Check if required columns exist
+            
             if 'keyword' not in df.columns or 'foods' not in df.columns:
                 logger.error(f"CSV must have 'keyword' and 'foods' columns. Found: {df.columns.tolist()}")
                 return False
             
-            # Clean and prepare data
-            df = df.dropna(subset=['keyword', 'foods'])  # Remove rows with missing values
+            
+            df = df.dropna(subset=['keyword', 'foods'])  
             X = df['keyword'].astype(str)
             y = df['foods'].astype(str)
             
             logger.info(f"Training data prepared. X shape: {X.shape}, y unique values: {y.nunique()}")
             
-            # Check if we have enough data
+           
             if len(X) < 10:
                 logger.warning("Not enough training data in CSV, falling back to synthetic model")
                 return self._create_and_train_synthetic_model()
@@ -153,7 +153,7 @@ class MoodFoodClassifier:
             self.model = LogisticRegression(max_iter=1000, random_state=42)
             self.model.fit(X_train, y_train)
             
-            # Evaluate
+           
             y_pred = self.model.predict(X_test)
             logger.info("Model training completed from CSV")
             logger.info(f"Classification Report:\n{classification_report(y_test, y_pred)}")
@@ -178,16 +178,16 @@ class MoodFoodClassifier:
             logger.info("Creating synthetic training data from mood mapping")
             training_data = []
             
-            # Generate synthetic training data
+            
             for mood, food_keywords in MOOD_FOOD_MAPPING.items():
                 for food_keyword in food_keywords:
                     training_data.append((mood, food_keyword))
-                    # Add variations
+                    
                     training_data.append((f"feeling {mood}", food_keyword))
                     training_data.append((f"I am {mood}", food_keyword))
                     training_data.append((f"{mood} mood", food_keyword))
             
-            # Add some noise and variations
+            
             additional_data = [
                 ("happy birthday", "cake"), ("celebration", "dessert"),
                 ("winter cold", "soup"), ("summer heat", "ice cream"),
@@ -236,11 +236,11 @@ class MoodFoodClassifier:
         try:
             mood_vec = self.vectorizer.transform([mood_text])
             
-            # Get probabilities for all classes
+            
             probabilities = self.model.predict_proba(mood_vec)[0]
             classes = self.model.classes_
             
-            # Get top N predictions
+            
             top_indices = np.argsort(probabilities)[-n_predictions:][::-1]
             top_predictions = [classes[i] for i in top_indices if probabilities[i] > 0.1]
             
@@ -249,13 +249,12 @@ class MoodFoodClassifier:
             logger.error(f"Error in ML prediction: {e}")
             return []
 
-# --- CHROMA DB AND EMBEDDING MODEL SETUP ---
+#  CHROMA DB AND EMBEDDING MODEL SETUP 
 chroma_client = chromadb.Client()
 recommendation_collection = chroma_client.get_or_create_collection("food_recommendations")
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# --- Configuration ---
-# MySQL Database Configuration
+
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
@@ -263,11 +262,11 @@ DB_CONFIG = {
     'database': 'gallerycafe'
 }
 
-# CSV Dataset Configuration - Fixed path
-CSV_DATASET_PATH = r"D:\UNI\Top Tasty treats new\model\ai_food_search_dataset_8.csv"  # Fixed path with raw string
+# CSV Dataset Configuration 
+CSV_DATASET_PATH = r"D:\UNI\Top Tasty treats new\model\ai_food_search_dataset_8.csv"  
 
 
-# Global variables
+
 food_data_details = {}
 food_keyword_dict = {}
 mood_classifier = MoodFoodClassifier()
@@ -277,10 +276,10 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
     Comprehensive food content analysis using both name and description.
     Returns categorized food attributes and mood associations.
     """
-    # Combine name and description for analysis
+    
     full_text = f"{name} {description}".lower()
     
-    # Food category keywords with mood associations
+    
     food_categories = {
         'desserts': {
             'keywords': ['cake', 'ice cream', 'dessert', 'sweet', 'chocolate', 'candy', 'cookie', 
@@ -342,7 +341,7 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
         }
     }
     
-    # Analyze the text for each category
+   
     detected_categories = []
     mood_associations = []
     
@@ -350,13 +349,13 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
         keywords = data['keywords']
         moods = data['moods']
         
-        # Check if any keywords match
+      
         matches = [keyword for keyword in keywords if keyword in full_text]
         if matches:
             detected_categories.append(category)
             mood_associations.extend(moods)
     
-    # Additional descriptive analysis
+   
     texture_keywords = []
     if any(word in full_text for word in ['crispy', 'crunchy', 'crisp']):
         texture_keywords.append('crispy crunchy satisfying')
@@ -373,7 +372,7 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
     
     return {
         'categories': detected_categories,
-        'moods': list(set(mood_associations)),  # Remove duplicates
+        'moods': list(set(mood_associations)),  
         'textures': texture_keywords,
         'temperatures': temperature_keywords
     }
@@ -383,13 +382,13 @@ def create_enhanced_embeddings(item_data: Dict) -> str:
     name = item_data.get('name', '')
     description = item_data.get('description', '')
     
-    # Create a rich text representation for better semantic matching
+   
     enhanced_text = f"{name} {description}"
     
-    # Perform comprehensive food analysis
+    
     analysis = analyze_food_content(name, description)
     
-    # Add category-based mood keywords
+   
     category_keywords = []
     for category in analysis['categories']:
         if category == 'desserts':
@@ -413,14 +412,14 @@ def create_enhanced_embeddings(item_data: Dict) -> str:
         elif category == 'indulgent_rich':
             category_keywords.append('rich indulgent romantic special luxurious sophisticated')
     
-    # Add mood associations from analysis
+    
     mood_keywords = ' '.join(analysis['moods'])
     
-    # Add texture and temperature keywords
+    
     texture_keywords = ' '.join(analysis['textures'])
     temperature_keywords = ' '.join(analysis['temperatures'])
     
-    # Combine all enhancements
+    
     all_enhancements = ' '.join(category_keywords + [mood_keywords, texture_keywords, temperature_keywords])
     enhanced_text += " " + all_enhancements
     
@@ -434,7 +433,7 @@ def load_and_process_data():
         db_connection = mysql.connector.connect(**DB_CONFIG)
         cursor = db_connection.cursor(dictionary=True)
         
-        cursor.execute("SELECT id, name, des, price, img FROM items")
+        cursor.execute("SELECT i.id, i.name, i.des, i.price, i.img, u.name AS shop_name, u.id AS shop_id, u.address AS shop_address FROM items i JOIN users u ON i.shop_id = u.id")
         db_items = cursor.fetchall()
         
         db_connection.close()
@@ -452,24 +451,27 @@ def load_and_process_data():
     ids_for_chroma = []
 
     for item in db_items:
-        # Store detailed item information
+        
         item_details = {
             "id": item['id'],
             "name": item['name'],
             "description": item['des'] or "Delicious dish",
             "price": float(item['price']) if item['price'] else 0.0,
-            "image": item['img']
+            "image": item['img'],
+            "shop_name": item['shop_name'],
+            "shop_address": item['shop_address'],
+            "shop_id": item['shop_id']
         }
         
         food_data_details[item['name'].lower()] = item_details
         food_keyword_dict[item['name'].lower()] = item['name']
         
-        # Create enhanced text for better embeddings
+        
         enhanced_text = create_enhanced_embeddings(item_details)
         documents_for_chroma.append(enhanced_text)
         ids_for_chroma.append(f"item_{item['id']}")
 
-    # Populate ChromaDB if empty
+   
     if recommendation_collection.count() == 0:
         logger.info("Populating ChromaDB with enhanced embeddings...")
         
@@ -494,12 +496,12 @@ def get_mood_keywords(user_input: str) -> List[str]:
     user_input_lower = user_input.lower()
     mood_keywords = []
     
-    # Direct mood mapping
+   
     for mood, keywords in MOOD_FOOD_MAPPING.items():
         if mood in user_input_lower:
             mood_keywords.extend(keywords)
     
-    # Additional keyword extraction
+   
     food_related_words = [
         'sweet', 'spicy', 'sour', 'salty', 'bitter', 'umami',
         'hot', 'cold', 'warm', 'fresh', 'crispy', 'creamy',
@@ -510,7 +512,7 @@ def get_mood_keywords(user_input: str) -> List[str]:
         if word in user_input_lower:
             mood_keywords.append(word)
     
-    return list(set(mood_keywords))  # Remove duplicates
+    return list(set(mood_keywords))  
 
 def ml_based_search(user_input: str, num_results: int = 3) -> List[Dict]:
     """Use ML classifier to predict food categories and find matching items using comprehensive analysis."""
@@ -518,45 +520,45 @@ def ml_based_search(user_input: str, num_results: int = 3) -> List[Dict]:
         return []
     
     try:
-        # Get ML predictions for food categories
+        
         predicted_categories = mood_classifier.predict_food_categories(user_input, n_predictions=5)
         
         if not predicted_categories:
             return []
         
-        # Find items that match predicted categories using comprehensive analysis
+        
         matching_items = []
         scored_items = []
         
         for name, details in food_data_details.items():
-            # Analyze the food item comprehensively
+           
             analysis = analyze_food_content(details['name'], details['description'])
             
-            # Create searchable text from analysis
+            
             item_categories = ' '.join(analysis['categories'])
             item_moods = ' '.join(analysis['moods'])
             item_text = f"{details['name']} {details['description']} {item_categories} {item_moods}".lower()
             
-            # Score based on predicted categories
+            
             score = 0
             matched_categories = []
             
             for category in predicted_categories:
                 category_words = category.lower().split()
                 
-                # Direct category match
+               
                 if category.lower() in item_text:
                     score += 3
                     matched_categories.append(category)
                 
-                # Partial word matches
+                
                 word_matches = sum(1 for word in category_words if word in item_text)
                 if word_matches > 0:
                     score += word_matches
-                    if word_matches >= len(category_words) * 0.6:  # 60% word match threshold
+                    if word_matches >= len(category_words) * 0.6:  
                         matched_categories.append(category)
             
-            # Boost score for mood alignment
+            
             user_mood_keywords = get_mood_keywords(user_input)
             mood_matches = sum(1 for mood in user_mood_keywords if mood in item_text)
             score += mood_matches * 2
@@ -569,16 +571,16 @@ def ml_based_search(user_input: str, num_results: int = 3) -> List[Dict]:
                     'analysis': analysis
                 })
         
-        # Sort by score and select top items
+    
         scored_items.sort(key=lambda x: x['score'], reverse=True)
         matching_items = [item['item'] for item in scored_items[:num_results]]
         
-        # If no direct matches, use the predicted categories for vector search
+        
         if not matching_items and predicted_categories:
             category_query = " ".join(predicted_categories)
             return vector_search(category_query, num_results)
         
-        # Log matching details for debugging
+        
         if scored_items:
             logger.info(f"ML search found {len(matching_items)} items with scores: {[item['score'] for item in scored_items[:num_results]]}")
         
@@ -593,45 +595,45 @@ def keyword_search(user_input: str, num_results: int = 3) -> List[Dict]:
     user_input_lower = user_input.lower()
     user_words = set(user_input_lower.split())
     
-    # Score-based matching for better results
+    
     scored_items = []
     
     for name, details in food_data_details.items():
         score = 0
         
-        # Analyze the food comprehensively
+        
         analysis = analyze_food_content(details['name'], details['description'])
         full_item_text = f"{details['name']} {details['description']}".lower()
         
-        # Direct name matching (highest priority)
+        
         if user_input_lower in details['name'].lower():
             score += 10
         
-        # Description keyword matching
+       
         description_words = set(details['description'].lower().split())
         word_matches = len(user_words.intersection(description_words))
         score += word_matches * 2
         
-        # Category matching from analysis
+        
         for category in analysis['categories']:
             if any(word in category for word in user_words):
                 score += 3
         
-        # Mood matching from analysis
+        
         mood_keywords = get_mood_keywords(user_input)
         for mood in analysis['moods']:
             if mood in mood_keywords:
                 score += 2
         
-        # Fuzzy name matching
+        
         available_names = [details['name'].lower()]
         fuzzy_matches = get_close_matches(user_input_lower, available_names, n=1, cutoff=0.4)
         if fuzzy_matches:
             score += 5
         
-        # Partial word matching in full text
+        
         for word in user_words:
-            if word in full_item_text and len(word) > 2:  # Ignore very short words
+            if word in full_item_text and len(word) > 2:  
                 score += 1
         
         if score > 0:
@@ -641,7 +643,7 @@ def keyword_search(user_input: str, num_results: int = 3) -> List[Dict]:
                 'analysis': analysis
             })
     
-    # Sort by score and return top results
+    
     scored_items.sort(key=lambda x: x['score'], reverse=True)
     results = [item['item'] for item in scored_items[:num_results]]
     
@@ -653,7 +655,7 @@ def keyword_search(user_input: str, num_results: int = 3) -> List[Dict]:
 def vector_search(query_text: str, num_results: int = 3) -> List[Dict]:
     """Enhanced vector search with better result processing."""
     try:
-        # Add mood keywords to enhance the query
+        
         mood_keywords = get_mood_keywords(query_text)
         enhanced_query = f"{query_text} {' '.join(mood_keywords)}"
         
@@ -661,19 +663,19 @@ def vector_search(query_text: str, num_results: int = 3) -> List[Dict]:
         
         results = recommendation_collection.query(
             query_embeddings=user_vector,
-            n_results=min(num_results * 2, 10)  # Get more results to filter
+            n_results=min(num_results * 2, 10)  
         )
         
         recommendations = []
         if results['documents'] and results['documents'][0]:
             for i, doc in enumerate(results['documents'][0]):
-                # Extract item name from the enhanced document
+                
                 words = doc.lower().split()
                 
-                # Try to find the item in our details
+                
                 for name, details in food_data_details.items():
                     if any(word in name for word in words[:3]) or name.split()[0] in doc.lower():
-                        if details not in recommendations:  # Avoid duplicates
+                        if details not in recommendations:  
                             recommendations.append(details)
                         break
                 
@@ -686,9 +688,9 @@ def vector_search(query_text: str, num_results: int = 3) -> List[Dict]:
         logger.error(f"Vector search error: {e}")
         return []
 
-# Load data and initialize ML model when the app starts
+
 food_keyword_data = load_and_process_data()
-mood_classifier.load_or_train_model(CSV_DATASET_PATH)  # Use configured CSV path
+mood_classifier.load_or_train_model(CSV_DATASET_PATH)  
 
 @app.route('/recommend', methods=['POST'])
 def recommend_enhanced():
@@ -701,8 +703,8 @@ def recommend_enhanced():
             return jsonify({"error": "No JSON data provided"}), 400
             
         user_input = data.get('query', '').strip()
-        num_results = min(data.get('num_results', 3), 10)  # Limit to max 10 results
-        use_ml = data.get('use_ml', True)  # Allow disabling ML
+        num_results = min(data.get('num_results', 3), 10)  
+        use_ml = data.get('use_ml', True) 
 
         if not user_input:
             return jsonify({"error": "Query not provided or empty"}), 400
@@ -712,7 +714,7 @@ def recommend_enhanced():
         all_recommendations = []
         methods_used = []
 
-        # 1. Try ML-based search first (if available and enabled)
+       
         if use_ml and mood_classifier.is_trained:
             ml_results = ml_based_search(user_input, num_results)
             if ml_results:
@@ -720,12 +722,12 @@ def recommend_enhanced():
                 methods_used.append("ml_classification")
                 logger.info(f"Found {len(ml_results)} ML-based matches")
 
-        # 2. Try keyword search
+       
         if len(all_recommendations) < num_results:
             remaining_needed = num_results - len(all_recommendations)
             keyword_results = keyword_search(user_input, remaining_needed)
             
-            # Add keyword results that aren't already in our recommendations
+            
             for result in keyword_results:
                 if not any(r['id'] == result['id'] for r in all_recommendations):
                     all_recommendations.append(result)
@@ -734,12 +736,12 @@ def recommend_enhanced():
                 methods_used.append("keyword_search")
                 logger.info(f"Added {len([r for r in keyword_results if not any(rec['id'] == r['id'] for rec in all_recommendations[:-len(keyword_results)])])} keyword matches")
 
-        # 3. If we still don't have enough results, try vector search
+        
         if len(all_recommendations) < num_results:
             remaining_needed = num_results - len(all_recommendations)
             vector_results = vector_search(user_input, remaining_needed)
             
-            # Add vector results that aren't already in our recommendations
+            
             for result in vector_results:
                 if not any(r['id'] == result['id'] for r in all_recommendations):
                     all_recommendations.append(result)
@@ -748,11 +750,11 @@ def recommend_enhanced():
                 methods_used.append("vector_search")
                 logger.info(f"Added {len([r for r in vector_results if not any(rec['id'] == r['id'] for rec in all_recommendations[:-len(vector_results)])])} vector search results")
 
-        # 4. If still no results, provide mood-based random recommendations
+        
         if not all_recommendations:
             mood_keywords = get_mood_keywords(user_input)
             if mood_keywords:
-                # Try to find items matching mood keywords
+               
                 mood_matches = []
                 for name, details in food_data_details.items():
                     item_text = f"{details['name']} {details['description']}".lower()
@@ -763,22 +765,22 @@ def recommend_enhanced():
                     all_recommendations.extend(random.sample(mood_matches, min(3, len(mood_matches))))
                     methods_used.append("mood_keyword_fallback")
                 else:
-                    # Final fallback: random items
+                  
                     random_items = random.sample(list(food_data_details.values()), min(3, len(food_data_details)))
                     all_recommendations.extend(random_items)
                     methods_used.append("random_fallback")
             else:
-                # Final fallback: random items
+                
                 random_items = random.sample(list(food_data_details.values()), min(3, len(food_data_details)))
                 all_recommendations.extend(random_items)
                 methods_used.append("random_fallback")
             
             logger.info("Using fallback recommendations")
 
-        # Limit final results
+      
         final_recommendations = all_recommendations[:num_results]
         
-        # Get ML predictions for additional context
+        
         ml_predictions = []
         if mood_classifier.is_trained:
             ml_predictions = mood_classifier.predict_food_categories(user_input, 3)
@@ -813,10 +815,10 @@ def analyze_food_item():
         if not food_name:
             return jsonify({"error": "Food name not provided"}), 400
 
-        # Perform comprehensive analysis
+        
         analysis = analyze_food_content(food_name, food_description)
         
-        # Create enhanced embedding text
+       
         item_data = {'name': food_name, 'description': food_description}
         enhanced_text = create_enhanced_embeddings(item_data)
         
@@ -885,7 +887,7 @@ def not_found(error):
 def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
-# --- RUN THE APP ---
+
 if __name__ == '__main__':
     if food_keyword_data is None:
         logger.error("Failed to load data. Server cannot start properly.")

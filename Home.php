@@ -164,7 +164,7 @@
         /* Special Offers Section */
         .special-offers {
             padding: 6rem 2rem;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #484747ff, #000000ff 100%);
             position: relative;
         }
 
@@ -351,25 +351,29 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+
+<?php
+    session_start();
+    $isLoggedIn = isset($_SESSION['username']);
+    ?>
+
     <nav class="navbar">
     <div class="logo">
         <h1>Top Tasty Treats</h1>
     </div>
     <ul class="nav-links">
-        <?php if ($isLoggedIn): ?>
-            <li><a href="logout.php">Logout</a></li>
-        <?php else: ?>
-            <li><a href="Login.php">Login</a></li>
-        <?php endif; ?>
+     
+        <li><a href="Login.php">Login</a></li>
         <li><a href="../menu/Menu.php">Menu</a></li>
         <li><a href="../menu/ShopMap.php">View Map</a></li>
         <li><a href="./MyOrders.php">My Order</a></li>
+        <li><a href="logout.php">Logout</a></li>
      
     </ul>
 </nav>
 
-    <!-- Hero Section -->
+
+    
     <section class="hero">
         <div class="hero-content">
             <h1>Welcome to Top Tasty Treats</h1>
@@ -381,7 +385,7 @@
         </div>
     </section>
 
-    <!-- Special Offers Section -->
+    
     <section class="special-offers">
         <h2 class="section-title reveal">Special Offers</h2>
         <div class="cards-container">
@@ -462,11 +466,7 @@
             observer.observe(el);
         });
 
-        // Simulate login state (you can integrate this with your PHP session)
-        const isLoggedIn = Math.random() > 0.5; // Random for demo
-        const authLink = document.getElementById('auth-link');
-        authLink.textContent = isLoggedIn ? 'Logout' : 'Login';
-        authLink.href = isLoggedIn ? 'logout.php' : 'Login.php';
+ 
 
         // Smooth scrolling for internal links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

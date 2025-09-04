@@ -371,6 +371,8 @@
                         const rawImagePath = foodItem.image || '';
                         const fullImageUrl = `../${rawImagePath}`; 
 
+                        console.log(foodItem);
+
                         const itemName = foodItem.name || 'Unknown Item';
                         const itemId = foodItem.id || Math.random().toString(36); 
                         const itemPrice = parseFloat(foodItem.price) || 0;

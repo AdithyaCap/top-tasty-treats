@@ -51,7 +51,7 @@ try {
             'description' => $item['description'] ?: 'Delicious food item',
             'price' => (float)($item['price'] ?: 0),
             'image' => $item['image'] ?: '',
-            'shop_id' => (int)$item['shop_id'],         // New: Shop ID
+            'shop_id' => (int)$item['shop_id'],
             'shop_name' => $item['shop_name'] ?: 'Unknown Shop',   
             'shop_address' => $item['shop_address'] ?: 'N/A', 
             'shop_city' => $item['shop_city'] ?: 'N/A'    
