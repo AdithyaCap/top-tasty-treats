@@ -2,59 +2,35 @@
 // product.php - Display details of a single food item
 
 // Include your database connection file (assuming it's in '../db.php')
-// This file is expected to connect to the database and make the $conn variable available.
 include '../db.php'; 
 
 // Check if an ID is provided in the URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    // It's better to show an error or redirect rather than just die() for a better user experience
-    // For now, we'll keep die() to quickly identify the issue if no ID is passed.
     die("Product ID not provided.");
 }
 
 $foodId = $_GET['id'];
 
-// The $conn object is expected to be available from db.php.
-// If db.php successfully connected, $conn is a valid mysqli object.
-// If db.php failed, it would have already called die().
-// So, this redundant check below can be removed.
-/*
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-*/
-
-// Prepare the SQL query to prevent SQL injection
-$sql = "SELECT id, name, des, price, img FROM items WHERE id = ?";
+// Prepare the SQL query with JOIN to get shop details
+$sql = "SELECT i.id, i.name, i.des, i.price, i.img, u.username AS shop_name, u.address AS shop_address FROM items i JOIN users u ON i.shop_id = u.id WHERE i.id = ?";
 $stmt = $conn->prepare($sql);
 
-// Check if the prepare statement failed
 if ($stmt === false) {
-    // Log or display the error if the statement cannot be prepared
     die("Error preparing statement: " . $conn->error);
 }
 
-// Bind the parameter: "i" indicates the parameter is an integer
-// Your 'id' column in the 'items' table is INT(11), so 'i' is correct.
 $stmt->bind_param("i", $foodId); 
-
-// Execute the prepared statement
 $stmt->execute();
-
-// Get the result of the query
 $result = $stmt->get_result();
 
 $food = null;
 if ($result->num_rows > 0) {
-    // Fetch the associative array for the food item
     $food = $result->fetch_assoc();
 } else {
-    // If no product is found with the given ID, display a message and stop.
     echo "<h1>Product not found.</h1>";
     exit(); 
 }
 
-// Close the statement and the database connection
 $stmt->close();
 $conn->close();
 ?>
@@ -109,6 +85,15 @@ $conn->close();
             font-weight: bold;
             margin-bottom: 30px;
         }
+        .shop-info {
+            font-size: 1.1em;
+            color: #666;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+        .shop-info strong {
+            color: #333;
+        }
         .back-button {
             display: inline-block;
             padding: 12px 25px;
@@ -128,7 +113,6 @@ $conn->close();
 
     <div class="container">
         <?php 
-            // Adjust image path if necessary. Your database stores '../uploads/...'
             $display_img = htmlspecialchars(str_replace('../', '', $food['img']));
             $full_image_path = '../uploads/' . $display_img; 
         ?>
@@ -136,6 +120,13 @@ $conn->close();
         <h1 class="product-detail-name"><?php echo htmlspecialchars($food['name']); ?></h1>
         <p class="product-detail-description"><?php echo htmlspecialchars($food['des']); ?></p>
         <p class="product-detail-price">$<?php echo htmlspecialchars($food['price']); ?></p>
+
+        <!-- New section to display shop name and location -->
+        <div class="shop-info">
+            <p><strong>Shop:</strong> <?php echo htmlspecialchars($food['shop_name']); ?></p>
+            <p><strong>Location:</strong> <?php echo htmlspecialchars($food['shop_address']); ?></p>
+        </div>
+
         <a href="../menu/Menu.php" class="back-button">Back to Menu</a>
     </div>
 

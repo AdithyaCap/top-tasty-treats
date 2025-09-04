@@ -14,7 +14,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'Admin') {
     <link rel="stylesheet" href="../css/nav.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallery Cafe</title>
+    <title>Top Tasty Treats</title>
 </head>
 
 <body>
@@ -34,7 +34,7 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'Admin') {
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2024 Gallery Cafe. All rights reserved.</p>
+        <p>&copy; 2025 Top Tasty Treats. All rights reserved.</p>
     </footer>
 </body>
 

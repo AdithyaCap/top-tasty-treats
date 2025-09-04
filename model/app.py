@@ -119,17 +119,35 @@ class MoodFoodClassifier:
         return False
     
     def _train_new_model(self, csv_path: str) -> bool:
-        """Train model from CSV data"""
+        """Train model from CSV data with correct column names"""
         try:
+            logger.info(f"Attempting to load CSV from: {csv_path}")
             df = pd.read_csv(csv_path)
+            logger.info(f"CSV loaded successfully. Shape: {df.shape}")
+            logger.info(f"CSV columns: {df.columns.tolist()}")
+            
+            # Check if required columns exist
+            if 'keyword' not in df.columns or 'foods' not in df.columns:
+                logger.error(f"CSV must have 'keyword' and 'foods' columns. Found: {df.columns.tolist()}")
+                return False
+            
+            # Clean and prepare data
+            df = df.dropna(subset=['keyword', 'foods'])  # Remove rows with missing values
             X = df['keyword'].astype(str)
             y = df['foods'].astype(str)
+            
+            logger.info(f"Training data prepared. X shape: {X.shape}, y unique values: {y.nunique()}")
+            
+            # Check if we have enough data
+            if len(X) < 10:
+                logger.warning("Not enough training data in CSV, falling back to synthetic model")
+                return self._create_and_train_synthetic_model()
             
             self.vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
             X_vec = self.vectorizer.fit_transform(X)
             
             X_train, X_test, y_train, y_test = train_test_split(
-                X_vec, y, test_size=0.2, random_state=42
+                X_vec, y, test_size=0.2, random_state=42, stratify=y if y.nunique() > 1 else None
             )
             
             self.model = LogisticRegression(max_iter=1000, random_state=42)
@@ -137,20 +155,27 @@ class MoodFoodClassifier:
             
             # Evaluate
             y_pred = self.model.predict(X_test)
-            logger.info("Model training completed")
+            logger.info("Model training completed from CSV")
             logger.info(f"Classification Report:\n{classification_report(y_test, y_pred)}")
             
             self._save_model()
             self.is_trained = True
             return True
             
+        except FileNotFoundError:
+            logger.error(f"CSV file not found at: {csv_path}")
+            return self._create_and_train_synthetic_model()
+        except pd.errors.EmptyDataError:
+            logger.error("CSV file is empty")
+            return self._create_and_train_synthetic_model()
         except Exception as e:
             logger.error(f"Error training model from CSV: {e}")
-            return False
+            return self._create_and_train_synthetic_model()
     
     def _create_and_train_synthetic_model(self) -> bool:
         """Create synthetic training data from mood mapping"""
         try:
+            logger.info("Creating synthetic training data from mood mapping")
             training_data = []
             
             # Generate synthetic training data
@@ -171,9 +196,11 @@ class MoodFoodClassifier:
             ]
             training_data.extend(additional_data)
             
-            df = pd.DataFrame(training_data, columns=['mood', 'food'])
-            X = df['mood'].astype(str)
-            y = df['food'].astype(str)
+            df = pd.DataFrame(training_data, columns=['keyword', 'foods'])
+            X = df['keyword'].astype(str)
+            y = df['foods'].astype(str)
+            
+            logger.info(f"Synthetic training data created. Shape: {df.shape}")
             
             self.vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
             X_vec = self.vectorizer.fit_transform(X)
@@ -197,6 +224,7 @@ class MoodFoodClassifier:
                 pickle.dump(self.model, f)
             with open(self.vectorizer_path, 'wb') as f:
                 pickle.dump(self.vectorizer, f)
+            logger.info("Model and vectorizer saved successfully")
         except Exception as e:
             logger.warning(f"Could not save model: {e}")
     
@@ -235,8 +263,8 @@ DB_CONFIG = {
     'database': 'gallerycafe'
 }
 
-# CSV Dataset Configuration
-CSV_DATASET_PATH = "./model/ai_food_search_dataset_8.csv"  # CSV file path
+# CSV Dataset Configuration - Fixed path
+CSV_DATASET_PATH = r"D:\UNI\Top Tasty treats new\model\ai_food_search_dataset_8.csv"  # Fixed path with raw string
 
 
 # Global variables
@@ -846,7 +874,7 @@ def health_check():
         "total_items": len(food_data_details),
         "chromadb_count": recommendation_collection.count(),
         "ml_model_trained": mood_classifier.is_trained,
-        "available_endpoints": ["/recommend", "/mood-predict", "/health"]
+        "available_endpoints": ["/recommend", "/analyze-food", "/mood-predict", "/health"]
     })
 
 @app.errorhandler(404)

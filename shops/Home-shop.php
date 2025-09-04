@@ -30,12 +30,12 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'Shop') {
 
     <!-- Welcome Text -->
     <div class="welcome-container">
-        <h1>Welcome to the Employee Panel</h1>
+        <h1>Welcome to the Shop Panel</h1>
     </div>
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2024 Gallery Cafe. All rights reserved.</p>
+        <p>&copy; 2025 Top Tasty Treats. All rights reserved.</p>
     </footer>
 </body>
 
