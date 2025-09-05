@@ -1,4 +1,4 @@
-# This system uses both machine learning and semantic embeddings for mood-based food recommendations
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
