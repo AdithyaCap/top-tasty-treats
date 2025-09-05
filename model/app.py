@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -22,10 +21,196 @@ import numpy as np
 app = Flask(__name__)
 CORS(app)
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Enhanced input validation system
+FOOD_RELATED_KEYWORDS = {
+    # Direct food terms
+    'food_items': [
+        'food', 'eat', 'hungry', 'meal', 'dish', 'cuisine', 'recipe', 'cook', 'cooking',
+        'breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer', 'beverage', 'drink',
+        'pizza', 'burger', 'pasta', 'rice', 'bread', 'soup', 'salad', 'sandwich', 'cake',
+        'chicken', 'beef', 'fish', 'vegetarian', 'vegan', 'spicy', 'sweet', 'salty', 'bitter',
+        'restaurant', 'cafe', 'kitchen', 'chef', 'menu', 'order', 'taste', 'flavor',
+        'hot', 'cold', 'fresh', 'frozen', 'organic', 'healthy', 'diet', 'nutrition'
+    ],
+    
+    # Mood and emotional states
+    'mood_states': [
+        'happy', 'sad', 'excited', 'tired', 'energetic', 'stressed', 'anxious', 'calm',
+        'depressed', 'cheerful', 'lonely', 'romantic', 'passionate', 'peaceful', 'angry',
+        'frustrated', 'overwhelmed', 'relaxed', 'motivated', 'lazy', 'sleepy', 'nervous',
+        'joyful', 'melancholy', 'zen', 'serene', 'bold', 'adventurous', 'curious', 'playful',
+        'loving', 'celebratory', 'comfort', 'comforting', 'down', 'energized', 'stimulated'
+    ],
+    
+    # Physical states and conditions
+    'physical_states': [
+        'sick', 'ill', 'unwell', 'nauseous', 'headache', 'fever', 'cold', 'flu',
+        'sore throat', 'upset stomach', 'craving', 'appetite', 'full', 'empty stomach',
+        'bloated', 'dehydrated', 'weak', 'strong', 'healthy', 'recovering', 'healing'
+    ],
+    
+    # Weather and environmental
+    'weather_environment': [
+        'hot', 'cold', 'warm', 'cool', 'sunny', 'rainy', 'snowy', 'humid', 'dry',
+        'winter', 'summer', 'spring', 'autumn', 'fall', 'season', 'weather', 'climate',
+        'freezing', 'boiling', 'mild', 'extreme', 'temperature'
+    ],
+    
+    # Energy and activity levels
+    'energy_levels': [
+        'low energy', 'high energy', 'no energy', 'energetic', 'lethargic', 'active',
+        'inactive', 'workout', 'exercise', 'gym', 'sports', 'running', 'tired',
+        'exhausted', 'sleepy', 'alert', 'awake', 'drowsy', 'vigorous', 'sluggish'
+    ],
+    
+    # Feelings and sensations
+    'feelings_sensations': [
+        'feel', 'feeling', 'sensation', 'craving', 'want', 'need', 'desire', 'wish',
+        'hungry for', 'thirsty', 'satisfaction', 'comfort', 'soothing', 'refreshing',
+        'warming', 'cooling', 'healing', 'nourishing', 'filling', 'light', 'heavy'
+    ],
+    
+    # Time and occasions
+    'time_occasions': [
+        'morning', 'afternoon', 'evening', 'night', 'midnight', 'dawn', 'dusk',
+        'breakfast time', 'lunch time', 'dinner time', 'snack time', 'late night',
+        'early morning', 'brunch', 'teatime', 'celebration', 'party', 'date',
+        'work', 'office', 'home', 'travel', 'vacation', 'holiday'
+    ],
+    
+    # Social contexts
+    'social_contexts': [
+        'alone', 'with friends', 'family', 'date', 'romantic', 'social', 'party',
+        'gathering', 'meeting', 'work lunch', 'family dinner', 'celebration',
+        'anniversary', 'birthday', 'wedding', 'funeral', 'comfort others'
+    ]
+}
+
+# Completely irrelevant terms that should trigger error
+IRRELEVANT_KEYWORDS = [
+    # Vehicles and transportation
+    'car', 'truck', 'bus', 'train', 'plane', 'bicycle', 'motorcycle', 'boat', 'ship',
+    'vehicle', 'transport', 'driving', 'flying', 'sailing', 'engine', 'wheel', 'tire',
+    
+    # Technology and electronics
+    'computer', 'laptop', 'phone', 'mobile', 'tablet', 'software', 'hardware', 'internet',
+    'wifi', 'bluetooth', 'cable', 'charger', 'battery', 'screen', 'keyboard', 'mouse',
+    
+    # Animals (unless food context)
+    'dog', 'cat', 'elephant', 'tiger', 'lion', 'bird', 'fish', 'horse', 'cow', 'pig',
+    'rabbit', 'snake', 'spider', 'insect', 'pet', 'zoo', 'wildlife', 'domestic',
+    
+    # Clothing and fashion
+    'shirt', 'pants', 'dress', 'shoes', 'hat', 'jacket', 'clothing', 'fashion',
+    'style', 'wear', 'outfit', 'uniform', 'costume', 'fabric', 'cotton', 'silk',
+    
+    # Tools and equipment
+    'hammer', 'screwdriver', 'wrench', 'drill', 'saw', 'tool', 'equipment',
+    'machine', 'device', 'instrument', 'gadget', 'apparatus',
+    
+    # Sports equipment (not activity)
+    'ball', 'bat', 'racket', 'stick', 'goal', 'net', 'equipment', 'gear',
+    
+    # Geography and places (unless restaurant context)
+    'mountain', 'river', 'ocean', 'desert', 'forest', 'city', 'country', 'continent',
+    'building', 'house', 'office', 'school', 'hospital', 'bank', 'store',
+    
+    # Colors (unless food context)
+    'red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown',
+    'black', 'white', 'gray', 'color', 'colorful',
+    
+    # Random objects
+    'table', 'chair', 'book', 'pen', 'paper', 'clock', 'mirror', 'lamp',
+    'door', 'window', 'wall', 'floor', 'ceiling', 'furniture',
+    
+    # Numbers and math
+    'one', 'two', 'three', 'four', 'five', 'number', 'math', 'calculate',
+    'equation', 'formula', 'statistics', 'data', 'graph', 'chart'
+]
+
+def is_food_related_query(user_input: str) -> Dict[str, any]:
+    """
+    Enhanced function to validate if the user input is food-related.
+    Returns a dictionary with validation result and details.
+    """
+    user_input_lower = user_input.lower().strip()
+    
+    if not user_input_lower:
+        return {
+            'is_valid': False,
+            'reason': 'empty_query',
+            'message': 'Please provide a valid query.'
+        }
+    
+    # Check for completely irrelevant terms first
+    for irrelevant_term in IRRELEVANT_KEYWORDS:
+        if irrelevant_term in user_input_lower:
+            # Exception: if it's in a food context, allow it
+            food_context_patterns = [
+                f"{irrelevant_term} food", f"food {irrelevant_term}",
+                f"{irrelevant_term} restaurant", f"restaurant {irrelevant_term}",
+                f"{irrelevant_term} flavor", f"flavor {irrelevant_term}",
+                f"eat {irrelevant_term}", f"{irrelevant_term} dish"
+            ]
+            
+            has_food_context = any(pattern in user_input_lower for pattern in food_context_patterns)
+            
+            if not has_food_context:
+                return {
+                    'is_valid': False,
+                    'reason': 'irrelevant_term',
+                    'message': f'Sorry, I can only help with food recommendations. "{irrelevant_term}" is not related to food or mood. Try asking about your mood, cravings, or food preferences instead.'
+                }
+    
+    # Check for food-related keywords
+    found_categories = []
+    total_matches = 0
+    
+    for category, keywords in FOOD_RELATED_KEYWORDS.items():
+        matches = [keyword for keyword in keywords if keyword in user_input_lower]
+        if matches:
+            found_categories.append(category)
+            total_matches += len(matches)
+    
+    # Special patterns for mood expressions
+    mood_patterns = [
+        r'\bi feel\s+\w+', r'\bi am\s+\w+', r'\bfeeling\s+\w+',
+        r'\blow energy\b', r'\bhigh energy\b', r'\bno energy\b',
+        r'\bhot day\b', r'\bcold day\b', r'\brainy day\b', r'\bsunny day\b',
+        r'\bi\'m\s+\w+', r'\btoday i\b', r'\bright now i\b',
+        r'\bcurrently\s+\w+', r'\bmood\s+\w+', r'\benergy\s+\w+',
+        r'\bweather\s+\w+', r'\bseason\s+\w+', r'\btemperature\s+\w+'
+    ]
+    
+    has_mood_pattern = any(re.search(pattern, user_input_lower) for pattern in mood_patterns)
+    
+    # If we found food-related keywords or mood patterns, it's valid
+    if found_categories or has_mood_pattern:
+        return {
+            'is_valid': True,
+            'reason': 'food_related',
+            'categories': found_categories,
+            'total_matches': total_matches,
+            'has_mood_pattern': has_mood_pattern
+        }
+    
+    # Check for very short queries that might be typos or too vague
+    if len(user_input.split()) == 1 and len(user_input) < 4:
+        return {
+            'is_valid': False,
+            'reason': 'too_vague',
+            'message': 'Your query seems too short or vague. Please tell me more about your mood, cravings, or food preferences.'
+        }
+    
+    # If nothing matches, it's likely not food-related
+    return {
+        'is_valid': False,
+        'reason': 'not_food_related',
+        'message': 'I can only help with food recommendations based on your mood, cravings, weather, energy levels, or food preferences. Please try again with a food-related query.'
+    }
 
 MOOD_FOOD_MAPPING = {
     # Happy moods
@@ -52,6 +237,20 @@ MOOD_FOOD_MAPPING = {
     'exhausted': ['comfort', 'easy', 'nourishing', 'restorative', 'smoothie', 'soup'],
     'nervous': ['calming', 'light', 'soothing', 'herbal', 'tea'],
     
+    # Physical states
+    'sick': ['light', 'easy to digest', 'warm', 'soothing', 'soup', 'tea', 'broth', 'toast'],
+    'ill': ['gentle', 'nourishing', 'warm', 'liquid', 'soup', 'smoothie', 'herbal tea'],
+    'low energy': ['energizing', 'protein', 'coffee', 'nuts', 'energy', 'revitalizing'],
+    'no energy': ['easy', 'quick energy', 'smoothie', 'fruit', 'coffee', 'light'],
+    
+    # Weather
+    'hot day': ['cold', 'refreshing', 'iced', 'light', 'cooling', 'ice cream', 'salad', 'smoothie'],
+    'cold day': ['warm', 'hearty', 'soup', 'hot', 'comforting', 'stew', 'cocoa', 'coffee'],
+    'hot': ['cold', 'refreshing', 'iced', 'light', 'cooling', 'ice cream', 'salad'],
+    'cold': ['warm', 'hearty', 'soup', 'hot', 'comforting', 'stew', 'cocoa'],
+    'rainy': ['warm', 'comfort', 'hearty', 'cozy', 'soup', 'coffee'],
+    'sunny': ['fresh', 'light', 'bright', 'energizing', 'fruit', 'smoothie'],
+    
     # Romantic moods
     'romantic': ['elegant', 'fancy', 'wine', 'intimate', 'special', 'chocolate', 'strawberry'],
     'loving': ['sweet', 'chocolate', 'romantic', 'special', 'dessert'],
@@ -70,12 +269,6 @@ MOOD_FOOD_MAPPING = {
     'relaxed': ['easy', 'casual', 'comfortable', 'light', 'snacks'],
     'zen': ['healthy', 'fresh', 'natural', 'balanced', 'green', 'tofu'],
     'serene': ['light', 'peaceful', 'gentle', 'herbal'],
-    
-    # Weather/Seasonal
-    'cold': ['warm', 'hearty', 'soup', 'hot', 'comforting', 'stew', 'cocoa'],
-    'hot': ['cold', 'refreshing', 'iced', 'light', 'cooling', 'ice cream', 'salad'],
-    'rainy': ['warm', 'comfort', 'hearty', 'cozy', 'soup', 'coffee'],
-    'sunny': ['fresh', 'light', 'bright', 'energizing', 'fruit', 'smoothie'],
     
     # Energy levels
     'sleepy': ['coffee', 'energizing', 'caffeine', 'stimulating'],
@@ -341,7 +534,7 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
         }
     }
     
-   
+    # Detect categories and mood associations
     detected_categories = []
     mood_associations = []
     
@@ -349,13 +542,13 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
         keywords = data['keywords']
         moods = data['moods']
         
-      
+        # Check if any keywords match the full text
         matches = [keyword for keyword in keywords if keyword in full_text]
         if matches:
             detected_categories.append(category)
             mood_associations.extend(moods)
     
-   
+    # Additional texture analysis
     texture_keywords = []
     if any(word in full_text for word in ['crispy', 'crunchy', 'crisp']):
         texture_keywords.append('crispy crunchy satisfying')
@@ -372,7 +565,7 @@ def analyze_food_content(name: str, description: str) -> Dict[str, List[str]]:
     
     return {
         'categories': detected_categories,
-        'moods': list(set(mood_associations)),  
+        'moods': list(set(mood_associations)),  # Remove duplicates
         'textures': texture_keywords,
         'temperatures': temperature_keywords
     }
@@ -382,13 +575,13 @@ def create_enhanced_embeddings(item_data: Dict) -> str:
     name = item_data.get('name', '')
     description = item_data.get('description', '')
     
-   
+    # Base enhanced text
     enhanced_text = f"{name} {description}"
     
-    
+    # Analyze food content
     analysis = analyze_food_content(name, description)
     
-   
+    # Add category-specific keywords
     category_keywords = []
     for category in analysis['categories']:
         if category == 'desserts':
@@ -412,14 +605,14 @@ def create_enhanced_embeddings(item_data: Dict) -> str:
         elif category == 'indulgent_rich':
             category_keywords.append('rich indulgent romantic special luxurious sophisticated')
     
-    
+    # Add mood keywords
     mood_keywords = ' '.join(analysis['moods'])
     
-    
+    # Add texture and temperature keywords
     texture_keywords = ' '.join(analysis['textures'])
     temperature_keywords = ' '.join(analysis['temperatures'])
     
-    
+    # Combine all enhancements
     all_enhancements = ' '.join(category_keywords + [mood_keywords, texture_keywords, temperature_keywords])
     enhanced_text += " " + all_enhancements
     
@@ -451,7 +644,7 @@ def load_and_process_data():
     ids_for_chroma = []
 
     for item in db_items:
-        
+        # Create item details dictionary
         item_details = {
             "id": item['id'],
             "name": item['name'],
@@ -466,12 +659,12 @@ def load_and_process_data():
         food_data_details[item['name'].lower()] = item_details
         food_keyword_dict[item['name'].lower()] = item['name']
         
-        
+        # Create enhanced embeddings
         enhanced_text = create_enhanced_embeddings(item_details)
         documents_for_chroma.append(enhanced_text)
         ids_for_chroma.append(f"item_{item['id']}")
 
-   
+    # Populate ChromaDB if empty
     if recommendation_collection.count() == 0:
         logger.info("Populating ChromaDB with enhanced embeddings...")
         
@@ -496,12 +689,12 @@ def get_mood_keywords(user_input: str) -> List[str]:
     user_input_lower = user_input.lower()
     mood_keywords = []
     
-   
+    # Check for direct mood mappings
     for mood, keywords in MOOD_FOOD_MAPPING.items():
         if mood in user_input_lower:
             mood_keywords.extend(keywords)
     
-   
+    # Additional food-related words
     food_related_words = [
         'sweet', 'spicy', 'sour', 'salty', 'bitter', 'umami',
         'hot', 'cold', 'warm', 'fresh', 'crispy', 'creamy',
@@ -512,7 +705,7 @@ def get_mood_keywords(user_input: str) -> List[str]:
         if word in user_input_lower:
             mood_keywords.append(word)
     
-    return list(set(mood_keywords))  
+    return list(set(mood_keywords))  # Remove duplicates
 
 def ml_based_search(user_input: str, num_results: int = 3) -> List[Dict]:
     """Use ML classifier to predict food categories and find matching items using comprehensive analysis."""
@@ -520,45 +713,45 @@ def ml_based_search(user_input: str, num_results: int = 3) -> List[Dict]:
         return []
     
     try:
-        
+        # Get ML predictions
         predicted_categories = mood_classifier.predict_food_categories(user_input, n_predictions=5)
         
         if not predicted_categories:
             return []
         
-        
+        # Find matching items
         matching_items = []
         scored_items = []
         
         for name, details in food_data_details.items():
-           
+            # Analyze this food item
             analysis = analyze_food_content(details['name'], details['description'])
             
-            
+            # Create searchable text for this item
             item_categories = ' '.join(analysis['categories'])
             item_moods = ' '.join(analysis['moods'])
             item_text = f"{details['name']} {details['description']} {item_categories} {item_moods}".lower()
             
-            
+            # Calculate score based on predicted categories
             score = 0
             matched_categories = []
             
             for category in predicted_categories:
                 category_words = category.lower().split()
                 
-               
+                # Direct category match
                 if category.lower() in item_text:
                     score += 3
                     matched_categories.append(category)
                 
-                
+                # Partial word matches
                 word_matches = sum(1 for word in category_words if word in item_text)
                 if word_matches > 0:
                     score += word_matches
-                    if word_matches >= len(category_words) * 0.6:  
+                    if word_matches >= len(category_words) * 0.6:  # 60% of words match
                         matched_categories.append(category)
             
-            
+            # Add mood-based scoring
             user_mood_keywords = get_mood_keywords(user_input)
             mood_matches = sum(1 for mood in user_mood_keywords if mood in item_text)
             score += mood_matches * 2
@@ -571,16 +764,16 @@ def ml_based_search(user_input: str, num_results: int = 3) -> List[Dict]:
                     'analysis': analysis
                 })
         
-    
+        # Sort by score and get top results
         scored_items.sort(key=lambda x: x['score'], reverse=True)
         matching_items = [item['item'] for item in scored_items[:num_results]]
         
-        
+        # Fallback to vector search if no ML matches
         if not matching_items and predicted_categories:
             category_query = " ".join(predicted_categories)
             return vector_search(category_query, num_results)
         
-        
+        # Log results
         if scored_items:
             logger.info(f"ML search found {len(matching_items)} items with scores: {[item['score'] for item in scored_items[:num_results]]}")
         
@@ -595,45 +788,45 @@ def keyword_search(user_input: str, num_results: int = 3) -> List[Dict]:
     user_input_lower = user_input.lower()
     user_words = set(user_input_lower.split())
     
-    
+    # Score all items
     scored_items = []
     
     for name, details in food_data_details.items():
         score = 0
         
-        
+        # Analyze food content
         analysis = analyze_food_content(details['name'], details['description'])
         full_item_text = f"{details['name']} {details['description']}".lower()
         
-        
+        # Exact name match
         if user_input_lower in details['name'].lower():
             score += 10
         
-       
+        # Word matches in description
         description_words = set(details['description'].lower().split())
         word_matches = len(user_words.intersection(description_words))
         score += word_matches * 2
         
-        
+        # Category matches
         for category in analysis['categories']:
             if any(word in category for word in user_words):
                 score += 3
         
-        
+        # Mood matches
         mood_keywords = get_mood_keywords(user_input)
         for mood in analysis['moods']:
             if mood in mood_keywords:
                 score += 2
         
-        
+        # Fuzzy name matching
         available_names = [details['name'].lower()]
         fuzzy_matches = get_close_matches(user_input_lower, available_names, n=1, cutoff=0.4)
         if fuzzy_matches:
             score += 5
         
-        
+        # General word matching
         for word in user_words:
-            if word in full_item_text and len(word) > 2:  
+            if word in full_item_text and len(word) > 2:  # Skip very short words
                 score += 1
         
         if score > 0:
@@ -643,7 +836,7 @@ def keyword_search(user_input: str, num_results: int = 3) -> List[Dict]:
                 'analysis': analysis
             })
     
-    
+    # Sort by score and get top results
     scored_items.sort(key=lambda x: x['score'], reverse=True)
     results = [item['item'] for item in scored_items[:num_results]]
     
@@ -655,7 +848,7 @@ def keyword_search(user_input: str, num_results: int = 3) -> List[Dict]:
 def vector_search(query_text: str, num_results: int = 3) -> List[Dict]:
     """Enhanced vector search with better result processing."""
     try:
-        
+        # Enhance query with mood keywords
         mood_keywords = get_mood_keywords(query_text)
         enhanced_query = f"{query_text} {' '.join(mood_keywords)}"
         
@@ -663,19 +856,19 @@ def vector_search(query_text: str, num_results: int = 3) -> List[Dict]:
         
         results = recommendation_collection.query(
             query_embeddings=user_vector,
-            n_results=min(num_results * 2, 10)  
+            n_results=min(num_results * 2, 10)  # Get more results to filter
         )
         
         recommendations = []
         if results['documents'] and results['documents'][0]:
             for i, doc in enumerate(results['documents'][0]):
-                
+                # Extract item name from document
                 words = doc.lower().split()
                 
-                
+                # Find matching item in our data
                 for name, details in food_data_details.items():
                     if any(word in name for word in words[:3]) or name.split()[0] in doc.lower():
-                        if details not in recommendations:  
+                        if details not in recommendations:  # Avoid duplicates
                             recommendations.append(details)
                         break
                 
@@ -688,14 +881,14 @@ def vector_search(query_text: str, num_results: int = 3) -> List[Dict]:
         logger.error(f"Vector search error: {e}")
         return []
 
-
+# Initialize data and model
 food_keyword_data = load_and_process_data()
 mood_classifier.load_or_train_model(CSV_DATASET_PATH)  
 
 @app.route('/recommend', methods=['POST'])
 def recommend_enhanced():
     """
-    Enhanced recommendation endpoint combining ML classification and semantic search.
+    Enhanced recommendation endpoint with input validation.
     """
     try:
         data = request.get_json()
@@ -711,10 +904,31 @@ def recommend_enhanced():
 
         logger.info(f"Processing query: '{user_input}'")
 
+        # Validate if the query is food-related
+        validation_result = is_food_related_query(user_input)
+        
+        if not validation_result['is_valid']:
+            return jsonify({
+                "error": validation_result['message'],
+                "suggestion": "Try asking about your mood (e.g., 'I feel sad', 'low energy'), weather (e.g., 'hot day', 'cold day'), or food preferences (e.g., 'something sweet', 'spicy food').",
+                "examples": [
+                    "I feel sad",
+                    "low energy",
+                    "hot day", 
+                    "cold day",
+                    "I feel sick",
+                    "something sweet",
+                    "spicy food",
+                    "comfort food"
+                ]
+            }), 400
+
+        logger.info(f"Query validation passed: {validation_result}")
+
         all_recommendations = []
         methods_used = []
 
-       
+        # Try ML-based search first
         if use_ml and mood_classifier.is_trained:
             ml_results = ml_based_search(user_input, num_results)
             if ml_results:
@@ -722,39 +936,39 @@ def recommend_enhanced():
                 methods_used.append("ml_classification")
                 logger.info(f"Found {len(ml_results)} ML-based matches")
 
-       
+        # Add keyword search if needed
         if len(all_recommendations) < num_results:
             remaining_needed = num_results - len(all_recommendations)
             keyword_results = keyword_search(user_input, remaining_needed)
             
-            
+            # Add non-duplicate results
             for result in keyword_results:
                 if not any(r['id'] == result['id'] for r in all_recommendations):
                     all_recommendations.append(result)
             
             if keyword_results:
                 methods_used.append("keyword_search")
-                logger.info(f"Added {len([r for r in keyword_results if not any(rec['id'] == r['id'] for rec in all_recommendations[:-len(keyword_results)])])} keyword matches")
+                logger.info(f"Added keyword matches")
 
-        
+        # Add vector search if still needed
         if len(all_recommendations) < num_results:
             remaining_needed = num_results - len(all_recommendations)
             vector_results = vector_search(user_input, remaining_needed)
             
-            
+            # Add non-duplicate results
             for result in vector_results:
                 if not any(r['id'] == result['id'] for r in all_recommendations):
                     all_recommendations.append(result)
             
             if vector_results:
                 methods_used.append("vector_search")
-                logger.info(f"Added {len([r for r in vector_results if not any(rec['id'] == r['id'] for rec in all_recommendations[:-len(vector_results)])])} vector search results")
+                logger.info(f"Added vector search results")
 
-        
+        # Fallback if no results found
         if not all_recommendations:
             mood_keywords = get_mood_keywords(user_input)
             if mood_keywords:
-               
+                # Try to find items matching mood keywords
                 mood_matches = []
                 for name, details in food_data_details.items():
                     item_text = f"{details['name']} {details['description']}".lower()
@@ -765,22 +979,22 @@ def recommend_enhanced():
                     all_recommendations.extend(random.sample(mood_matches, min(3, len(mood_matches))))
                     methods_used.append("mood_keyword_fallback")
                 else:
-                  
+                    # Last resort: random items
                     random_items = random.sample(list(food_data_details.values()), min(3, len(food_data_details)))
                     all_recommendations.extend(random_items)
                     methods_used.append("random_fallback")
             else:
-                
+                # Last resort: random items
                 random_items = random.sample(list(food_data_details.values()), min(3, len(food_data_details)))
                 all_recommendations.extend(random_items)
                 methods_used.append("random_fallback")
             
             logger.info("Using fallback recommendations")
 
-      
+        # Limit to requested number of results
         final_recommendations = all_recommendations[:num_results]
         
-        
+        # Get ML predictions for insight
         ml_predictions = []
         if mood_classifier.is_trained:
             ml_predictions = mood_classifier.predict_food_categories(user_input, 3)
@@ -791,7 +1005,8 @@ def recommend_enhanced():
             "query": user_input,
             "total_found": len(final_recommendations),
             "ml_predictions": ml_predictions,
-            "mood_keywords": get_mood_keywords(user_input)
+            "mood_keywords": get_mood_keywords(user_input),
+            "validation": validation_result
         }
         
         logger.info(f"Returning {len(final_recommendations)} recommendations using methods: {methods_used}")
@@ -799,6 +1014,33 @@ def recommend_enhanced():
 
     except Exception as e:
         logger.error(f"Error in recommend_enhanced: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/validate-query', methods=['POST'])
+def validate_query():
+    """Endpoint to validate if a query is food-related without making recommendations."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+            
+        user_input = data.get('query', '').strip()
+        if not user_input:
+            return jsonify({"error": "Query not provided"}), 400
+
+        validation_result = is_food_related_query(user_input)
+        
+        return jsonify({
+            "query": user_input,
+            "is_valid": validation_result['is_valid'],
+            "reason": validation_result['reason'],
+            "message": validation_result.get('message', ''),
+            "detected_categories": validation_result.get('categories', []),
+            "has_mood_pattern": validation_result.get('has_mood_pattern', False)
+        })
+
+    except Exception as e:
+        logger.error(f"Error in validate_query: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/analyze-food', methods=['POST'])
@@ -815,10 +1057,10 @@ def analyze_food_item():
         if not food_name:
             return jsonify({"error": "Food name not provided"}), 400
 
-        
+        # Analyze the food item
         analysis = analyze_food_content(food_name, food_description)
         
-       
+        # Create enhanced embedding text
         item_data = {'name': food_name, 'description': food_description}
         enhanced_text = create_enhanced_embeddings(item_data)
         
@@ -852,6 +1094,15 @@ def predict_mood_categories():
         if not user_input:
             return jsonify({"error": "Mood not provided"}), 400
 
+        # Validate input first
+        validation_result = is_food_related_query(user_input)
+        
+        if not validation_result['is_valid']:
+            return jsonify({
+                "error": validation_result['message'],
+                "suggestion": "Please provide a mood or food-related query."
+            }), 400
+
         if not mood_classifier.is_trained:
             return jsonify({"error": "ML model not available"}), 503
 
@@ -861,7 +1112,8 @@ def predict_mood_categories():
         return jsonify({
             "mood": user_input,
             "ml_predictions": predictions,
-            "mood_keywords": mood_keywords
+            "mood_keywords": mood_keywords,
+            "validation": validation_result
         })
 
     except Exception as e:
@@ -876,7 +1128,8 @@ def health_check():
         "total_items": len(food_data_details),
         "chromadb_count": recommendation_collection.count(),
         "ml_model_trained": mood_classifier.is_trained,
-        "available_endpoints": ["/recommend", "/analyze-food", "/mood-predict", "/health"]
+        "available_endpoints": ["/recommend", "/validate-query", "/analyze-food", "/mood-predict", "/health"],
+        "input_validation": "enabled"
     })
 
 @app.errorhandler(404)
@@ -887,11 +1140,11 @@ def not_found(error):
 def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
-
 if __name__ == '__main__':
     if food_keyword_data is None:
         logger.error("Failed to load data. Server cannot start properly.")
     else:
         logger.info(f"Server starting with {len(food_data_details)} food items loaded")
         logger.info(f"ML model trained: {mood_classifier.is_trained}")
+        logger.info("Input validation system enabled")
         app.run(debug=True, host='127.0.0.1', port=5000)
