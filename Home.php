@@ -1,3 +1,8 @@
+<?php
+    session_start();
+    $isLoggedIn = !empty($_SESSION['username']);
+    ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -352,22 +357,22 @@
 </head>
 <body>
 
-<?php
-    session_start();
-    $isLoggedIn = isset($_SESSION['username']);
-    ?>
-
     <nav class="navbar">
     <div class="logo">
         <h1>Top Tasty Treats</h1>
     </div>
     <ul class="nav-links">
-     
+         
+    <?php if ($isLoggedIn): ?>
+        <li><a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['username']) ?>)</a></li>
+    <?php else: ?>
         <li><a href="Login.php">Login</a></li>
+    <?php endif; ?>
+       
         <li><a href="../menu/Menu.php">Menu</a></li>
         <li><a href="../menu/ShopMap.php">View Map</a></li>
         <li><a href="./MyOrders.php">My Order</a></li>
-        <li><a href="logout.php">Logout</a></li>
+      
      
     </ul>
 </nav>
